@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,14 +6,14 @@ namespace DataAccess.Repository
 {
     public interface IRoomRepository
     {
-        Task<Room> GetRoomByID(int id);
-        Task UpdateRoom(Room Room);
-        Task DeleteRoom(Room Room);
-        Task AddRoom(Room Room);
-        Task<IEnumerable<Room>> GetRoomList();
-        Task<IEnumerable<Room>> GetRoomsOfAHostel(int hostelId);
-        Task ActivateRoom(int id);
-        Task DenyRoom(int id);
-        Task PendingRoom(int id);
+        Room GetRoomByID(int id);
+        void UpdateRoom(Room Room);
+        void DeleteRoom(Room Room);
+        void AddRoom(Room Room);
+        IEnumerable<Room> GetRoomList();
+        IEnumerable<Room> GetRoomsOfAHostel(int hostelId);
+        void ActivateRoom(int id);
+        void DenyRoom(int id);
+        void PendingRoom(int id);
     }
 }

@@ -1,4 +1,5 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,34 +11,22 @@ namespace DataAccess.DAO
 {
     public class CategoryDAO
     {
-        private static CategoryDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static CategoryDAO Instance
+        
+        public static IEnumerable<Category> GetCategoriesList()
         {
-            get
-            {
-                lock (instanceLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new CategoryDAO();
-                    }
-                    return instance;
-                }
-            }
-        }
-
-        public async Task<IEnumerable<Category>> GetCategoriesList()
-        {
+            var listCategories = new List<Category>();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.Categories.ToListAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    listCategories = context.Categories.ToList();
+                }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(e.Message);
             }
+            return listCategories;
         }
     }
 }

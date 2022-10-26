@@ -1,4 +1,5 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,64 +11,58 @@ namespace DataAccess.DAO
 {
     public class RoomPicDAO
     {
-        private static RoomPicDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static RoomPicDAO Instance
+        public static void AddRoomPic(RoomPic RoomPic)
         {
-            get
+            try
             {
-                lock (instanceLock)
+                //RoomPic.RoomPicsId = 0;
+                //var HostelManagementContext = new HostelManagementContext();
+                //HostelManagementContext.Attach(RoomPic).State = EntityState.Added;
+                //int a = 3;
+                //await HostelManagementContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [HostelManagement].[dbo].[RoomPics] ON");
+                //await HostelManagementContext.SaveChangesAsync();
+                //await HostelManagementContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [HostelManagement].[dbo].[RoomPics] OFF");
+                using (var context = new HostelManagementDBContext())
                 {
-                    if (instance == null)
-                    {
-                        instance = new RoomPicDAO();
-                    }
-                    return instance;
+                    context.Attach(RoomPic).State = EntityState.Added;
+                    context.SaveChanges();
                 }
             }
-        }
-        private RoomPicDAO() { }
-        public async Task AddRoomPic(RoomPic RoomPic)
-        {
-            try
-            {
-                RoomPic.RoomPicsId = 0;
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(RoomPic).State = EntityState.Added;
-                int a = 3;
-                await HostelManagementContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [HostelManagement].[dbo].[RoomPics] ON");
-                await HostelManagementContext.SaveChangesAsync();
-                await HostelManagementContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [HostelManagement].[dbo].[RoomPics] OFF");
-            }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
 
-        public async Task<IEnumerable<RoomPic>> GetRoomPicsOfARoom(int RoomId)
+        public static IEnumerable<RoomPic> GetRoomPicsOfARoom(int RoomId)
         {
+            var listHostels = new List<RoomPic>();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.RoomPics
+                using (var context = new HostelManagementDBContext())
+                {
+                    listHostels = context.RoomPics
                     .Include(h => h.Room)
                     .Where(h => h.RoomId == RoomId)
-                    .ToListAsync();
+                    .ToList();
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return listHostels;
         }
 
-        public async Task DeleteRoomPic(RoomPic RoomPic)
+        public static void DeleteRoomPic(RoomPic RoomPic)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.RoomPics.Remove(RoomPic);
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.RoomPics.Remove(RoomPic);
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {

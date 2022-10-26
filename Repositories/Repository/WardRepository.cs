@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using DataAccess.DAO;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,7 +11,7 @@ namespace DataAccess.Repository
 {
     public class WardRepository : IWardRepository
     {
-        public async Task<IEnumerable<Ward>> GetWardListByDistrictId(int DistrictId)
-            => await WardDAO.Instance.GetWardListByDistrictId(DistrictId);
+        public IEnumerable<Ward> GetWardListByDistrictId(int DistrictId)
+            => WardDAO.GetWardListByDistrictId(DistrictId);
     }
 }

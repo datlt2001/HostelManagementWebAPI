@@ -1,4 +1,5 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,29 +11,15 @@ namespace DataAccess.DAO
 {
     public class LocationDAO
     {
-        private static LocationDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static LocationDAO Instance
-        {
-            get
-            {
-                lock (instanceLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new LocationDAO();
-                    }
-                    return instance;
-                }
-            }
-        }
-        public async Task AddLocation(Location Location)
+        public static void AddLocation(Location Location)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(Location).State = EntityState.Added;
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.Attach(Location).State = EntityState.Added;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -40,43 +27,54 @@ namespace DataAccess.DAO
             }
         }
 
-        public async Task<Location> GetLocationByID(int id)
+        public static Location GetLocationByID(int id)
         {
+            var acc = new Location();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.Locations
+                using (var context = new HostelManagementDBContext())
+                {
+                    acc = context.Locations
                     .Include(l => l.Ward)
                         .ThenInclude(l => l.District)
                             .ThenInclude(l => l.Province)
-                    .SingleOrDefaultAsync(location => location.LocationId == id);
+                    .SingleOrDefault(location => location.LocationId == id);
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return acc;
         }
 
-        public async Task<IEnumerable<Location>> GetLocationsList()
+        public static IEnumerable<Location> GetLocationsList()
         {
+            var listHostels = new List<Location>();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.Locations.ToListAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    listHostels = context.Locations
+                    .ToList();
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return listHostels;
         }
 
-        public async Task UpdateLocation(Location location)
+        public static void UpdateLocation(Location location)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(location).State = EntityState.Modified;
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.Attach(location).State = EntityState.Modified;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {

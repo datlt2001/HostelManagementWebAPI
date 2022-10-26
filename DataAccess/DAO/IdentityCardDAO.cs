@@ -3,35 +3,55 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BusinessObject.BusinessObject;
+using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.DAO
 {
     public class IdentityCardDAO
     {
-        private static IdentityCardDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static IdentityCardDAO Instance
+        public static void AddIdCard(IdentityCard idCard)
         {
-            get
+            try
             {
-                lock(instanceLock)
+                using (var context = new HostelManagementDBContext())
                 {
-                    if (instance == null)
-                        instance = new IdentityCardDAO();
-                    return instance;
+                    context.Attach(idCard).State = EntityState.Added;
+                    context.SaveChanges();
                 }
             }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
-        private IdentityCardDAO() { }
-        public async Task AddIdCard(IdentityCard idCard)
+
+        public static void DeleteIdCard(IdentityCard idCard)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(idCard).State = EntityState.Added;
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.IdentityCards.Remove(idCard);
+                    context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public static void UpdateIdCard(IdentityCard idCard)
+        {
+
+            try
+            {
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.Attach(idCard).State = EntityState.Modified;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -39,46 +59,23 @@ namespace DataAccess.DAO
             }
         }
 
-        public async Task DeleteIdCard(IdentityCard idCard)
+        public static IdentityCard GetIdentityCardByID(string id)
         {
+            var acc = new IdentityCard();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.IdentityCards.Remove(idCard);
-                await HostelManagementContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-        public async Task UpdateIdCard(IdentityCard idCard)
-        {
-            try
-            {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(idCard).State = EntityState.Modified;
-                await HostelManagementContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<IdentityCard> GetIdentityCardByID(string id)
-        {
-            try
-            {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.IdentityCards
+                using (var context = new HostelManagementDBContext())
+                {
+                    acc = context.IdentityCards
                     .Include(h => h.Accounts)
-                    .FirstOrDefaultAsync(idC => idC.IdCardNumber == id);
+                    .FirstOrDefault(idC => idC.IdCardNumber == id);
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return acc;
         }
     }
 }

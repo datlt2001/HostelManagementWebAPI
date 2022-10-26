@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,6 @@ namespace DataAccess.Repository
 {
     public interface IProvinceRepository
     {
-        Task<IEnumerable<Province>> GetProvincesList();
+        IEnumerable<Province> GetProvincesList();
     }
 }

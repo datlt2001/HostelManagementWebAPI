@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +9,8 @@ namespace DataAccess.Repository
 {
     public interface IRoomPicRepository
     {
-        Task AddRoomPic(RoomPic RoomPic);
-        Task<IEnumerable<RoomPic>> GetRoomPicsOfARoom(int RoomId);
-        Task DeleteRoomPic(RoomPic RoomPic);
+        void AddRoomPic(RoomPic RoomPic);
+        IEnumerable<RoomPic> GetRoomPicsOfARoom(int RoomId);
+        void DeleteRoomPic(RoomPic RoomPic);
     }
 }

@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +9,10 @@ namespace DataAccess.Repository
 {
     public interface IRentRepository
     {
-        Task AddRent(Rent Rent);
-        Task UpdateRent(Rent Rent);
-        Task<IEnumerable<Rent>> GetRentListByRoom(int roomId);
-        Task<IEnumerable<Rent>> GetRentList();
-        Task<Rent> GetRentByID(int id);
+        void AddRent(Rent Rent);
+        void UpdateRent(Rent Rent);
+        IEnumerable<Rent> GetRentListByRoom(int roomId);
+        IEnumerable<Rent> GetRentList();
+        Rent GetRentByID(int id);
     }
 }

@@ -1,4 +1,5 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,30 +11,16 @@ namespace DataAccess.DAO
 {
     public class BillDetailDAO
     {
-        private static BillDetailDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static BillDetailDAO Instance
-        {
-            get
-            {
-                lock (instanceLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new BillDetailDAO();
-                    }
-                    return instance;
-                }
-            }
-        }
 
-        public async Task AddBillDetail(BillDetail billDetail)
+        public static void AddBillDetail(BillDetail billDetail)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(billDetail).State = EntityState.Added;
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.Attach(billDetail).State = EntityState.Added;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -41,23 +28,27 @@ namespace DataAccess.DAO
             }
         }
 
-        public async Task<IEnumerable<BillDetail>> GetBillDetailList()
+        public static IEnumerable<BillDetail> GetBillDetailList()
         {
+            var listBillDetails = new List<BillDetail>();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.BillDetails
+                using (var context = new HostelManagementDBContext())
+                {
+                    listBillDetails = context.BillDetails
                     .Include(b => b.Bill)
                         .ThenInclude(b => b.Rent)
                             .ThenInclude(b => b.Room)
                                 .ThenInclude(b => b.Hostel)
                                     .ThenInclude(b => b.HostelOwnerEmailNavigation)
-                    .ToListAsync();
+                    .ToList();
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return listBillDetails;
         }
     }
 }

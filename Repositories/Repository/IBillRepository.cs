@@ -1,5 +1,4 @@
-﻿using BusinessObject.BusinessObject;
-using BusinessObjects.Models;
+﻿using BusinessObjects.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +9,9 @@ namespace DataAccess.Repository
 {
     public interface IBillRepository
     {
-        Task AddBill(Bill bill); 
-        Task UpdateBill(Bill bill); 
-        Task<Bill> GetBillById(int BillId);
-        Task<IEnumerable<Bill>> GetBillList();
+        void AddBill(Bill bill);
+        void UpdateBill(Bill bill);
+        Bill GetBillById(int BillId);
+        IEnumerable<Bill> GetBillList();
     }
 }

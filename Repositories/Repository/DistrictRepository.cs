@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using DataAccess.DAO;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,7 +11,7 @@ namespace DataAccess.Repository
 {
     public class DistrictRepository : IDistrictRepository
     {
-        public async Task<IEnumerable<District>> GetDistrictListByProvinceId(int ProvinceId) 
-            => await DistrictDAO.Instance.GetDistrictListByProvinceId(ProvinceId);
+        public IEnumerable<District> GetDistrictListByProvinceId(int ProvinceId)
+            => DistrictDAO.GetDistrictListByProvinceId(ProvinceId);
     }
 }

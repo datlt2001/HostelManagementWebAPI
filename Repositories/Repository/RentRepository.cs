@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using DataAccess.DAO;
 using System;
 using System.Collections.Generic;
@@ -10,10 +10,10 @@ namespace DataAccess.Repository
 {
     public class RentRepository : IRentRepository
     {
-        public async Task AddRent(Rent Rent) => await RentDAO.Instance.AddRent(Rent);
-        public async Task UpdateRent(Rent Rent) => await RentDAO.Instance.UpdateRent(Rent);
-        public async Task<IEnumerable<Rent>> GetRentListByRoom(int roomId) => await RentDAO.Instance.GetRentListByRoom(roomId);
-        public async Task<IEnumerable<Rent>> GetRentList() => await RentDAO.Instance.GetRentList();
-        public async Task<Rent> GetRentByID(int id) => await RentDAO.Instance.GetRentByID(id);
+        public void AddRent(Rent Rent) =>  RentDAO.AddRent(Rent);
+        public void UpdateRent(Rent Rent) =>  RentDAO.UpdateRent(Rent);
+        public IEnumerable<Rent> GetRentListByRoom(int roomId) =>  RentDAO.GetRentListByRoom(roomId);
+        public IEnumerable<Rent> GetRentList() =>  RentDAO.GetRentList();
+        public Rent GetRentByID(int id) =>  RentDAO.GetRentByID(id);
     }
 }

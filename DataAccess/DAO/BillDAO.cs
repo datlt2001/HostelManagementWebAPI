@@ -1,37 +1,25 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DataAccess.DAO
 {
     public class BillDAO
     {
-        private static BillDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static BillDAO Instance
-        {
-            get
-            {
-                lock (instanceLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new BillDAO();
-                    }
-                    return instance;
-                }
-            }
-        }
-
-        public async Task AddBill(Bill bill)
+        
+        public static void AddBill(Bill bill)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(bill).State = EntityState.Added;
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.Attach(bill).State = EntityState.Added;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -39,12 +27,14 @@ namespace DataAccess.DAO
             }
         }
 
-        public async Task<Bill> GetBillById(int BillId)
+        public static Bill GetBillById(int BillId)
         {
+            var bill = new Bill();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.Bills
+                using (var context = new HostelManagementDBContext())
+                {
+                    bill = context.Bills
                     .Include(b => b.BillDetails)
                         .Include(b => b.Rent)
                             .ThenInclude(b => b.Room)
@@ -52,20 +42,24 @@ namespace DataAccess.DAO
                                     .ThenInclude(b => b.HostelOwnerEmailNavigation)
                         .Include(b => b.Rent)
                             .ThenInclude(b => b.RentedByNavigation)
-                    .FirstOrDefaultAsync(bill => bill.BillId == BillId);
+                    .FirstOrDefault(bill => bill.BillId == BillId);
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return bill;
         }
 
-        public async Task<IEnumerable<Bill>> GetBillList()
+        public static IEnumerable<Bill> GetBillList()
         {
+            var listBills = new List<Bill>();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.Bills
+                using (var context = new HostelManagementDBContext())
+                {
+                    listBills = context.Bills
                         .Include(b => b.BillDetails)
                         .Include(b => b.Rent)
                             .ThenInclude(b => b.Room)
@@ -73,21 +67,25 @@ namespace DataAccess.DAO
                                     .ThenInclude(b => b.HostelOwnerEmailNavigation)
                         .Include(b => b.Rent)
                             .ThenInclude(b => b.RentedByNavigation)
-                    .ToListAsync();
+                        .ToList();
+                }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(e.Message);
             }
+            return listBills;
         }
 
-        public async Task UpdateBill(Bill Bill)
+        public static void UpdateBill(Bill Bill)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(Bill).State = EntityState.Modified;
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.Attach(Bill).State = EntityState.Modified;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {

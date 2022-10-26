@@ -1,5 +1,4 @@
-﻿using BusinessObject.BusinessObject;
-using BusinessObjects.Models;
+﻿using BusinessObjects.Models;
 using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,30 +11,32 @@ namespace DataAccess.DAO
 {
     public class AccountDAO
     {
-        private static AccountDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static AccountDAO Instance
+        public static List<Account> GetAccountList()
         {
-            get
+            var listAccounts = new List<Account>();
+            try
             {
-                lock (instanceLock)
+                using (var context = new HostelManagementDBContext())
                 {
-                    if (instance == null)
-                    {
-                        instance = new AccountDAO();
-                    }
-                    return instance;
+                    listAccounts = context.Accounts.ToList();
                 }
             }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+            return listAccounts;
         }
-        private AccountDAO() { }
-        public async Task AddAccount(Account Account)
+
+        public static void AddAccount(Account Account)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementDBContext();
-                HostelManagementContext.Attach(Account).State = EntityState.Added;
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.Attach(Account).State = EntityState.Added;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -43,13 +44,16 @@ namespace DataAccess.DAO
             }
         }
 
-        public async Task DeleteAccount(Account Account)
+        public static void DeleteAccount(Account Account)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementDBContext();
-                HostelManagementContext.Accounts.Remove(Account);
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    var acc = context.Accounts.SingleOrDefault(a => a.UserId == Account.UserId);
+                    context.Accounts.Remove(acc);
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -57,16 +61,95 @@ namespace DataAccess.DAO
             }
         }
 
-        public async Task<Account> GetAccountByEmail(string email)
+        public static Account GetAccountByEmail(string email)
+        {
+            var acc = new Account();
+            try
+            {
+                using (var context = new HostelManagementDBContext())
+                {
+                    acc = context.Accounts
+                        .Include(id => id.IdCardNumberNavigation)
+                        .Include(id => id.Hostels)
+                        .Include(id => id.Rents)
+                        .SingleOrDefault(account => account.UserEmail == email);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return acc;
+        }
+
+        public static Account GetAccountByID(int id)
+        {
+            var acc = new Account();
+            try
+            {
+                using (var context = new HostelManagementDBContext())
+                {
+                    acc = context.Accounts
+                        .Include(id => id.IdCardNumberNavigation)
+                        .Include(id => id.Hostels)
+                        .Include(id => id.Rents)
+                        .SingleOrDefault(account => account.UserId == id);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return acc;
+        }
+
+        public static Account GetLoginAccount(string email, string password)
+        {
+            var acc = new Account();
+            try
+            {
+                using (var context = new HostelManagementDBContext())
+                {
+                    acc = context.Accounts
+                        .Include(id => id.IdCardNumberNavigation)
+                        .Include(id => id.Hostels)
+                        .Include(id => id.Rents)
+                        .SingleOrDefault(account => account.UserEmail == email && account.UserPassword == password);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return acc;
+        }
+
+        public static void UpdateAccount(Account Account)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementDBContext();
-                return await HostelManagementContext.Accounts
-                    .Include(id => id.IdCardNumberNavigation)
-                    .Include(id => id.Hostels)
-                    .Include(id => id.Rents)
-                    .SingleOrDefaultAsync(account => account.UserEmail == email);
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.Attach(Account).State = EntityState.Modified;
+                    context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public static void InactiveUser(int id)
+        {
+            try
+            {
+                using (var context = new HostelManagementDBContext())
+                {
+                    var account = context.Accounts.SingleOrDefault(a => a.UserId.Equals(id));
+                    context.Attach(account).State = EntityState.Modified;
+                    account.Status = 0;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -74,95 +157,17 @@ namespace DataAccess.DAO
             }
         }
 
-        public async Task<Account> GetAccountByID(int id)
+        public static void ActivateUser(int id)
         {
             try
             {
-                var HostelManagementContext = new HostelManagementDBContext();
-                return await HostelManagementContext.Accounts
-                    .Include(id => id.IdCardNumberNavigation)
-                    .Include(id => id.Hostels)
-                    .Include(id => id.Rents)
-                    .SingleOrDefaultAsync(account => account.UserId == id);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<IEnumerable<Account>> GetAccountList()
-        {
-            try
-            {
-                var HostelManagementContext = new HostelManagementDBContext();
-                return await HostelManagementContext.Accounts
-                    .Include(id => id.IdCardNumberNavigation)
-                    .Include(id => id.Hostels)
-                    .Include(id => id.Rents)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task<Account> GetLoginAccount(string email, string password)
-        {
-            try
-            {
-                var HostelManagementContext = new HostelManagementDBContext();
-                return await HostelManagementContext.Accounts
-                    .Include(id => id.IdCardNumberNavigation)
-                    .Include(id => id.Hostels)
-                    .Include(id => id.Rents)
-                    .SingleOrDefaultAsync(account => account.UserEmail == email && account.UserPassword == password);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task UpdateAccount(Account Account)
-        {
-            try
-            {
-                var HostelManagementContext = new HostelManagementDBContext();
-                HostelManagementContext.Attach(Account).State = EntityState.Modified;
-                await HostelManagementContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.InnerException.Message);
-            }
-        }
-        public async Task InactiveUser(int id)
-        {
-            try
-            {
-                var HostelManagementContext = new HostelManagementDBContext();
-                var account = HostelManagementContext.Accounts.SingleOrDefault(a => a.UserId.Equals(id));
-                HostelManagementContext.Accounts.Attach(account);
-                account.Status = 0;
-                await HostelManagementContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        public async Task ActivateUser(int id)
-        {
-            try
-            {
-                var HostelManagementContext = new HostelManagementContext();
-                var account = HostelManagementContext.Accounts.SingleOrDefault(a => a.UserId.Equals(id));
-                HostelManagementContext.Accounts.Attach(account);
-                account.Status = 1;
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    var account = context.Accounts.SingleOrDefault(a => a.UserId.Equals(id));
+                    context.Attach(account).State = EntityState.Modified;
+                    account.Status = 1;
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {

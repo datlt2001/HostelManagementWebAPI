@@ -1,4 +1,5 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,34 +10,22 @@ namespace DataAccess.DAO
 {
     public class WardDAO
     {
-        private static WardDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static WardDAO Instance
+        public static IEnumerable<Ward> GetWardListByDistrictId(int DistrictId)
         {
-            get
-            {
-                lock (instanceLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new WardDAO();
-                    }
-                    return instance;
-                }
-            }
-        }
-
-        public async Task<IEnumerable<Ward>> GetWardListByDistrictId(int DistrictId)
-        {
+            var listHostels = new List<Ward>();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.Wards.Where(d => d.DistrictId == DistrictId).OrderBy(w => w.WardName).ToListAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    listHostels = context.Wards.Where(d => d.DistrictId == DistrictId).OrderBy(w => w.WardName)
+                    .ToList();
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return listHostels;
         }
     }
 }

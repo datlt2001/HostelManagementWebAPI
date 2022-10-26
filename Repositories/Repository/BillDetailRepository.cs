@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using DataAccess.DAO;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ namespace DataAccess.Repository
 {
     public class BillDetailRepository : IBillDetailRepository
     {
-        public async Task AddBillDetail(BillDetail billDetail) => await BillDetailDAO.Instance.AddBillDetail(billDetail);
-        public async Task<IEnumerable<BillDetail>> GetBillDetailList() => await BillDetailDAO.Instance.GetBillDetailList();
+        public void AddBillDetail(BillDetail billDetail) => BillDetailDAO.AddBillDetail(billDetail);
+        public IEnumerable<BillDetail> GetBillDetailList() => BillDetailDAO.GetBillDetailList();
     }
 }

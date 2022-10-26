@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,9 +6,9 @@ namespace DataAccess.Repository
 {
     public interface IHostelPicRepository
     {
-        Task AddHostelPic(HostelPic hostelPic);
-        Task<IEnumerable<HostelPic>> GetHostelPicsOfAHostel(int hostelId);
-        Task DeleteHostelPic(HostelPic hostelPic);
-        Task<HostelPic> GetHostelPic(int id);
+        void AddHostelPic(HostelPic hostelPic);
+        IEnumerable<HostelPic> GetHostelPicsOfAHostel(int hostelId);
+        void DeleteHostelPic(HostelPic hostelPic);
+        HostelPic GetHostelPic(int id);
     }
 }

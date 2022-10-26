@@ -1,4 +1,4 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
 using DataAccess.DAO;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,6 +11,6 @@ namespace DataAccess.Repository
 {
     public class CategoryRepository : ICategoryRepository
     {
-        public async Task<IEnumerable<Category>> GetCategoriesList() => await CategoryDAO.Instance.GetCategoriesList();
+        public  IEnumerable<Category> GetCategoriesList() => CategoryDAO.GetCategoriesList();
     }
 }

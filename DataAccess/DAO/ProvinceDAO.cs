@@ -1,4 +1,5 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,34 +10,22 @@ namespace DataAccess.DAO
 {
     public class ProvinceDAO
     {
-        private static ProvinceDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static ProvinceDAO Instance
+        public static IEnumerable<Province> GetProvincesList()
         {
-            get
-            {
-                lock (instanceLock)
-                {
-                    if (instance == null)
-                    {
-                        instance = new ProvinceDAO();
-                    }
-                    return instance;
-                }
-            }
-        }
-
-        public async Task<IEnumerable<Province>> GetProvincesList()
-        {
+            var listHostels = new List<Province>();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.Provinces.OrderBy(p => p.ProvinceName).ToListAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    listHostels = context.Provinces.OrderBy(p => p.ProvinceName)
+                    .ToList();
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            return listHostels;
         }
     }
 }

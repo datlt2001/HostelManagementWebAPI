@@ -1,4 +1,5 @@
-﻿using BusinessObject.BusinessObject;
+﻿using BusinessObjects.Models;
+using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,49 +10,56 @@ namespace DataAccess.DAO
 {
     public class HostelPicDAO
     {
-        private static HostelPicDAO instance = null;
-        private static readonly object instanceLock = new object();
-        public static HostelPicDAO Instance
+        public static void AddHostelPic(HostelPic hostelPic)
         {
-            get
+            try
             {
-                lock (instanceLock)
+                using (var context = new HostelManagementDBContext())
                 {
-                    if (instance == null)
-                    {
-                        instance = new HostelPicDAO();
-                    }
-                    return instance;
+                    context.Attach(hostelPic).State = EntityState.Added;
+                    context.SaveChanges();
+
+                    //HostelManagementContext.Attach(hostelPic).State = EntityState.Added;
+                    //await HostelManagementContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [HostelManagement].[dbo].[HostelPics] ON");
+                    //await HostelManagementContext.SaveChangesAsync();
+                    //await HostelManagementContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [HostelManagement].[dbo].[HostelPics] OFF");
                 }
             }
-        }
-        private HostelPicDAO() { }
-        public async Task AddHostelPic(HostelPic hostelPic)
-        {
-            try
-            {
-                hostelPic.HostelPicsId = 0;
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.Attach(hostelPic).State = EntityState.Added;
-                await HostelManagementContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [HostelManagement].[dbo].[HostelPics] ON"); 
-                await HostelManagementContext.SaveChangesAsync();
-                await HostelManagementContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT [HostelManagement].[dbo].[HostelPics] OFF");
-            }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
 
-        public async Task<IEnumerable<HostelPic>> GetHostelPicsOfAHostel(int hostelId)
+        public static IEnumerable<HostelPic> GetHostelPicsOfAHostel(int hostelId)
         {
+            var listHostels = new List<HostelPic>();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                return await HostelManagementContext.HostelPics
+                using (var context = new HostelManagementDBContext())
+                {
+                    listHostels = context.HostelPics
                     .Include(h => h.Hostel)
                     .Where(h => h.HostelId == hostelId)
-                    .ToListAsync();
+                    .ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return listHostels;
+        }
+
+        public static void DeleteHostelPic(HostelPic hostelPic)
+        {
+            try
+            {
+                using (var context = new HostelManagementDBContext())
+                {
+                    context.HostelPics.Remove(hostelPic);
+                    context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {
@@ -59,32 +67,21 @@ namespace DataAccess.DAO
             }
         }
 
-        public async Task DeleteHostelPic(HostelPic hostelPic)
+        public static HostelPic GetHostelPic(int id)
         {
+            var acc = new HostelPic();
             try
             {
-                var HostelManagementContext = new HostelManagementContext();
-                HostelManagementContext.HostelPics.Remove(hostelPic);
-                await HostelManagementContext.SaveChangesAsync();
+                using (var context = new HostelManagementDBContext())
+                {
+                    acc = context.HostelPics.SingleOrDefault(hp => hp.HostelPicsId.Equals(id));
+                }
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-        }
-
-        public async Task<HostelPic> GetHostelPic(int id)
-        {
-            try
-            {
-                var HostelManagementContext = new HostelManagementContext();
-                var pic = await HostelManagementContext.HostelPics.SingleOrDefaultAsync(hp => hp.HostelPicsId.Equals(id));
-                return pic;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            return acc;
         }
     }
 }
