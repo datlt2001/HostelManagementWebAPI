@@ -34,13 +34,17 @@ namespace DataAccess.DAO
             {
                 using (var context = new HostelManagementDBContext())
                 {
-                    context.Attach(Account).State = EntityState.Added;
+                    //context.Attach(Account).State = EntityState.Added;
+                    context.Accounts.Add(Account);
+                    //context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [HostelManagementDB].[dbo].[Account] OFF");
                     context.SaveChanges();
+                    //context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [HostelManagementDB].[dbo].[Account] OFF");
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception("message: " + ex.Message);
+                
             }
         }
 
