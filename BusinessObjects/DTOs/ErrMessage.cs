@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusinessObjects.DTOs
 {
-    class ErrorMessage
+    public class ErrMessage
     {
         public string Message { get; set; }
     }

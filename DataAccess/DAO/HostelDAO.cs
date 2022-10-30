@@ -70,8 +70,8 @@ namespace DataAccess.DAO
                     .Include(h => h.Category)
                     .Include(h => h.Location)
                         .ThenInclude(h => h.Ward)
-                            .ThenInclude(h => h.District)
-                                .ThenInclude(h => h.Province)
+                     //       .ThenInclude(h => h.District)
+                     //          .ThenInclude(h => h.Province)
                     .Include(h => h.HostelPics)
                     .Include(h => h.HostelOwnerEmailNavigation)
                     .ToList();
@@ -108,14 +108,14 @@ namespace DataAccess.DAO
                 using (var context = new HostelManagementDBContext())
                 {
                     accs = context.Hostels
-                    .Include(h => h.Rooms)
-                    .Include(h => h.Category)
-                    .Include(h => h.Location)
-                        .ThenInclude(h => h.Ward)
-                            .ThenInclude(h => h.District)
-                                .ThenInclude(h => h.Province)
-                    .Include(h => h.HostelPics)
-                    .Include(h => h.HostelOwnerEmailNavigation)
+                    //.Include(h => h.Rooms)
+                    //.Include(h => h.Category)
+                    //.Include(h => h.Location)
+                    //    .ThenInclude(h => h.Ward)
+                    //        .ThenInclude(h => h.District)
+                    //            .ThenInclude(h => h.Province)
+                    //.Include(h => h.HostelPics)
+                    //.Include(h => h.HostelOwnerEmailNavigation)
                     //.ThenInclude(h => h.UserId)
                     .Where(h => h.HostelOwnerEmailNavigation.UserId == id)
                     .ToList();

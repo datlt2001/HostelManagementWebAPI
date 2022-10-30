@@ -1,7 +1,12 @@
+using DataAccess.Data;
+using DataAccess.Repository;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +15,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace HostelManagementAPI
@@ -28,10 +34,43 @@ namespace HostelManagementAPI
         {
 
             services.AddControllers();
+            //         services.AddControllers().AddJsonOptions(x =>
+            //x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve);
+            services.AddControllers()
+            .AddJsonOptions(o => o.JsonSerializerOptions
+                .ReferenceHandler = ReferenceHandler.Preserve);
+            services.AddSession();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "HostelManagementAPI", Version = "v1" });
             });
+            services.AddMvc();
+            services.AddDbContext<HostelManagementDBContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("HostelManagementDBContext")));
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.AccessDeniedPath = "/AccessDenied";
+                    options.LoginPath = "/Index";
+                    options.LogoutPath = "/Logout";
+                });
+            services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<IHostelRepository, HostelRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IProvinceRepository, ProvinceRepository>();
+            services.AddScoped<IDistrictRepository, DistrictRepository>();
+            services.AddScoped<IWardRepository, WardRepository>();
+            services.AddScoped<ILocationRepository, LocationRepository>();
+            services.AddScoped<IHostelPicRepository, HostelPicRepository>();
+            services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<IRoomPicRepository, RoomPicRepository>();
+            services.AddScoped<IRentRepository, RentRepository>();
+            services.AddScoped<IBillRepository, BillRepository>();
+            services.AddScoped<IBillDetailRepository, BillDetailRepository>();
+            services.AddScoped<IRoomMemberRepository, RoomMemberRepository>();
+            services.AddScoped<IIdentityCardRepository, IdentityCardRepository>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,7 +87,10 @@ namespace HostelManagementAPI
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
+            app.UseSession();
+
 
             app.UseEndpoints(endpoints =>
             {
