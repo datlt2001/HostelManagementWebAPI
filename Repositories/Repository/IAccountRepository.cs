@@ -9,14 +9,14 @@ namespace DataAccess.Repository
 {
     public interface IAccountRepository
     {
-        Account GetLoginAccount(string email, string password);
-        Account GetAccountByID(int id);
-        Account GetAccountByEmail(string email);
-        void UpdateAccount(Account Account);
-        void DeleteAccount(Account Account);
-        void AddAccount(Account Account);
-        void ActivateUser(int id);
-        void InactivateUser(int id);
-        List<Account> GetAccounts();
+        Task<Account> GetLoginAccount(string email, string password);
+        Task<Account> GetAccountByID(int id);
+        Task<Account> GetAccountByEmail(string email);
+        Task UpdateAccount(Account Account);
+        Task DeleteAccount(Account Account);
+        Task AddAccount(Account Account);
+        Task<IEnumerable<Account>> GetAccountList();
+        Task ActivateUser(int id);
+        Task InactivateUser(int id);
     }
 }

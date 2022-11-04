@@ -6,14 +6,14 @@ namespace DataAccess.Repository
 {
     public interface IHostelRepository
     {
-        Hostel GetHostelByID(int id);
-        void UpdateHostel(Hostel hostel);
-        void DeleteHostel(Hostel hostel);
-        void AddHostel(Hostel hostel);
-        IEnumerable<Hostel> GetHostelsList();
-        IEnumerable<Hostel> GetHostelsOfAnOwner(int id);
-        void DeactivateHostel(int id);
-        void ActivateHostel(int id);
-        void DenyHostel(int id);
+        Task<Hostel> GetHostelByID(int id);
+        Task UpdateHostel(Hostel hostel);
+        Task DeleteHostel(Hostel hostel);
+        Task AddHostel(Hostel hostel);
+        Task<IEnumerable<Hostel>> GetHostelsList();
+        Task<IEnumerable<Hostel>> GetHostelsOfAnOwner(int id);
+        Task DeactivateHostel(int id);
+        Task ActivateHostel(int id);
+        Task DenyHostel(int id);
     }
 }

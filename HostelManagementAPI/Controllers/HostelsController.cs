@@ -19,55 +19,55 @@ namespace HostelManagementAPI
         [Authorize(Roles = "Admin")]
         //GET: api/Hostels
         [HttpGet]
-        public IEnumerable<Hostel> GetHostels() => repository.GetHostelsList();
+        public async Task<IEnumerable<Hostel>> GetHostels() => await repository.GetHostelsList();
         //GET
         [HttpGet("GetHostelsOfAnOwner/{id}")]
-        public IEnumerable<Hostel> GetHostelsOfAnOwner(int id) => repository.GetHostelsOfAnOwner(id);
+        public async Task<IEnumerable<Hostel>> GetHostelsOfAnOwner(int id) => await repository.GetHostelsOfAnOwner(id);
 
         //PUT
         [HttpPut("DeactivateHostel/{id}")]
-        public IActionResult DeactivateHostel(int id)
+        public async Task<IActionResult> DeactivateHostel(int id)
         {
-            var hostel = repository.GetHostelByID(id);
+            var hostel = await repository.GetHostelByID(id);
             if (hostel == null)
             {
                 return NotFound();
             }
-            repository.DeactivateHostel(id);
+            await repository.DeactivateHostel(id);
             return NoContent();
         }
 
         //PUT
         [HttpPut("ActivateHostel/{id}")]
-        public IActionResult ActivateHostel(int id)
+        public async Task<IActionResult> ActivateHostel(int id)
         {
-            var hostel = repository.GetHostelByID(id);
+            var hostel = await repository.GetHostelByID(id);
             if (hostel == null)
             {
                 return NotFound();
             }
-            repository.ActivateHostel(id);
+            await repository.ActivateHostel(id);
             return NoContent();
         }
 
         //PUT
         [HttpPut("DenyHostel/{id}")]
-        public IActionResult DenyHostel(int id)
+        public async Task<IActionResult> DenyHostel(int id)
         {
-            var hostel = repository.GetHostelByID(id);
+            var hostel = await repository.GetHostelByID(id);
             if (hostel == null)
             {
                 return NotFound();
             }
-            repository.DenyHostel(id);
+            await repository.DenyHostel(id);
             return NoContent();
         }
 
         // GET api/<HostelsController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            var hostel = repository.GetHostelByID(id);
+            var hostel = await repository.GetHostelByID(id);
             if (hostel == null)
             {
                 return NotFound();
@@ -78,25 +78,25 @@ namespace HostelManagementAPI
 
         //POST: HostelsController/Hostels
         [HttpPost]
-        public IActionResult PostHostel([FromForm] Hostel hostel)
+        public async Task<IActionResult> PostHostel([FromForm] Hostel hostel)
         {
             hostel.HostelId = 0;
             hostel.Category = null;
             hostel.HostelOwnerEmailNavigation = null;
             hostel.Location = null;
-            repository.AddHostel(hostel);
+            await repository.AddHostel(hostel);
             return NoContent();
         }
 
         [HttpPut("id")]
-        public IActionResult UpdateHostel(int id, [FromForm] Hostel hostel)
+        public async Task<IActionResult> UpdateHostel(int id, [FromForm] Hostel hostel)
         {
-            var aTmp = repository.GetHostelByID(id);
+            var aTmp = await repository.GetHostelByID(id);
             if (aTmp == null)
             {
                 return NotFound();
             }
-            repository.UpdateHostel(hostel);
+            await repository.UpdateHostel(hostel);
             return NoContent();
         }
 

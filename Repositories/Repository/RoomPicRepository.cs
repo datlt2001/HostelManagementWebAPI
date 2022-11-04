@@ -10,8 +10,8 @@ namespace DataAccess.Repository
 {
     public class RoomPicRepository : IRoomPicRepository
     {
-        public void AddRoomPic(RoomPic RoomPic) =>  RoomPicDAO.AddRoomPic(RoomPic);
-        public void DeleteRoomPic(RoomPic RoomPic) =>  RoomPicDAO.DeleteRoomPic(RoomPic);
-        public IEnumerable<RoomPic> GetRoomPicsOfARoom(int RoomId) => RoomPicDAO.GetRoomPicsOfARoom(RoomId);
+        public async Task AddRoomPic(RoomPic RoomPic) => await RoomPicDAO.Instance.AddRoomPic(RoomPic);
+        public async Task DeleteRoomPic(RoomPic RoomPic) => await RoomPicDAO.Instance.DeleteRoomPic(RoomPic);
+        public async Task<IEnumerable<RoomPic>> GetRoomPicsOfARoom(int RoomId) => await RoomPicDAO.Instance.GetRoomPicsOfARoom(RoomId);
     }
 }

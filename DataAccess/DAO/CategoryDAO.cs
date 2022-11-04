@@ -11,22 +11,34 @@ namespace DataAccess.DAO
 {
     public class CategoryDAO
     {
-        
-        public static IEnumerable<Category> GetCategoriesList()
+        private static CategoryDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static CategoryDAO Instance
         {
-            var listCategories = new List<Category>();
-            try
+            get
             {
-                using (var context = new HostelManagementDBContext())
+                lock (instanceLock)
                 {
-                    listCategories = context.Categories.ToList();
+                    if (instance == null)
+                    {
+                        instance = new CategoryDAO();
+                    }
+                    return instance;
                 }
             }
-            catch (Exception e)
+        }
+
+        public async Task<IEnumerable<Category>> GetCategoriesList()
+        {
+            try
             {
-                throw new Exception(e.Message);
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Categories.ToListAsync();
             }
-            return listCategories;
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

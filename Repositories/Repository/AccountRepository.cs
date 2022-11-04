@@ -11,19 +11,20 @@ namespace DataAccess.Repository
 {
     public class AccountRepository : IAccountRepository
     {
-        public void AddAccount(Account Account) => AccountDAO.AddAccount(Account);
+        public async Task AddAccount(Account Account) => await AccountDAO.Instance.AddAccount(Account);
 
-        public void DeleteAccount(Account Account) =>  AccountDAO.DeleteAccount(Account);
+        public async Task DeleteAccount(Account Account) => await AccountDAO.Instance.DeleteAccount(Account);
 
-        public Account GetAccountByEmail(string email) =>  AccountDAO.GetAccountByEmail(email);
+        public async Task<Account> GetAccountByEmail(string email) => await AccountDAO.Instance.GetAccountByEmail(email);
 
-        public Account GetAccountByID(int id) =>  AccountDAO.GetAccountByID(id);
+        public async Task<Account> GetAccountByID(int id) => await AccountDAO.Instance.GetAccountByID(id);
 
-        public Account GetLoginAccount(string email, string password) =>  AccountDAO.GetLoginAccount(email, password);
+        public async Task<IEnumerable<Account>> GetAccountList() => await AccountDAO.Instance.GetAccountList();
 
-        public void UpdateAccount(Account Account) =>  AccountDAO.UpdateAccount(Account);
-        public void ActivateUser(int id) =>  AccountDAO.ActivateUser(id);
-        public void InactivateUser(int id) =>  AccountDAO.InactiveUser(id);
-        public List<Account> GetAccounts() => AccountDAO.GetAccountList();
+        public async Task<Account> GetLoginAccount(string email, string password) => await AccountDAO.Instance.GetLoginAccount(email, password);
+
+        public async Task UpdateAccount(Account Account) => await AccountDAO.Instance.UpdateAccount(Account);
+        public async Task ActivateUser(int id) => await AccountDAO.Instance.ActivateUser(id);
+        public async Task InactivateUser(int id) => await AccountDAO.Instance.InactiveUser(id);
     }
 }

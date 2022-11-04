@@ -9,6 +9,6 @@ namespace DataAccess.Repository
 {
     public interface IProvinceRepository
     {
-        IEnumerable<Province> GetProvincesList();
+        Task<IEnumerable<Province>> GetProvincesList();
     }
 }

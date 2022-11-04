@@ -11,7 +11,7 @@ namespace DataAccess.Repository
 {
     public class WardRepository : IWardRepository
     {
-        public IEnumerable<Ward> GetWardListByDistrictId(int DistrictId)
-            => WardDAO.GetWardListByDistrictId(DistrictId);
+        public async Task<IEnumerable<Ward>> GetWardListByDistrictId(int DistrictId)
+            => await WardDAO.Instance.GetWardListByDistrictId(DistrictId);
     }
 }

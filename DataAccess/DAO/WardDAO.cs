@@ -10,22 +10,34 @@ namespace DataAccess.DAO
 {
     public class WardDAO
     {
-        public static IEnumerable<Ward> GetWardListByDistrictId(int DistrictId)
+        private static WardDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static WardDAO Instance
         {
-            var listHostels = new List<Ward>();
+            get
+            {
+                lock (instanceLock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new WardDAO();
+                    }
+                    return instance;
+                }
+            }
+        }
+
+        public async Task<IEnumerable<Ward>> GetWardListByDistrictId(int DistrictId)
+        {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    listHostels = context.Wards.Where(d => d.DistrictId == DistrictId).OrderBy(w => w.WardName)
-                    .ToList();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Wards.Where(d => d.DistrictId == DistrictId).OrderBy(w => w.WardName).ToListAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            return listHostels;
         }
     }
 }

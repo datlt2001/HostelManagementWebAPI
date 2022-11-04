@@ -10,15 +10,29 @@ namespace DataAccess.DAO
 {
     public class RoomDAO
     {
-        public static void AddRoom(Room room)
+        private static RoomDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static RoomDAO Instance
+        {
+            get
+            {
+                lock (instanceLock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new RoomDAO();
+                    }
+                    return instance;
+                }
+            }
+        }
+        public async Task AddRoom(Room room)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.Attach(room).State = EntityState.Added;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(room).State = EntityState.Added;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -26,86 +40,58 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void DeleteRoom(Room Room)
+        public async Task DeleteRoom(Room Room)
         {
             throw new NotImplementedException();
         }
 
-        public static Room GetRoomByID(int id)
+        public async Task<Room> GetRoomByID(int id)
         {
-            var acc = new Room();
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    acc = context.Rooms
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Rooms
                     .Include(r => r.Hostel)
                         .ThenInclude(r => r.HostelOwnerEmailNavigation)
                     .Include(r => r.RoomPics)
                     .Include(r => r.Rents)
-                    .FirstOrDefault(m => m.RoomId == id);
-                }
+                    .FirstOrDefaultAsync(m => m.RoomId == id);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            return acc;
         }
 
-        public static IEnumerable<Room> GetRoomsList()
+        public async Task<IEnumerable<Room>> GetRoomsList()
         {
-            var listHostels = new List<Room>();
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    listHostels = context.Rooms
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Rooms
                     .Include(r => r.Hostel)
                         .ThenInclude(h => h.HostelOwnerEmailNavigation)
                     .Include(r => r.RoomPics)
                     .Include(r => r.Rents)
-                    .ToList();
-                }
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            return listHostels;
         }
 
-        public static IEnumerable<Room> GetRoomsOfAHostel(int hostelId)
+        public async Task<IEnumerable<Room>> GetRoomsOfAHostel(int hostelId)
         {
-            var listHostels = new List<Room>();
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    listHostels = context.Rooms
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Rooms
                         .Include(r => r.Hostel)
                         .Include(r => r.RoomPics)
                         .Include(r => r.Rents)
                         .Where(r => r.HostelId == hostelId)
-                    .ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return listHostels;
-        }
-
-        public static void UpdateRoom(Room room)
-        {
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.Attach(room).State = EntityState.Modified;
-                    context.SaveChanges();
-                }
+                        .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -113,17 +99,13 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void ActivateRoom(int id)
+        public async Task UpdateRoom(Room room)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var room = context.Rooms.SingleOrDefault(h => h.RoomId.Equals(id));
-                    context.Attach(room).State = EntityState.Modified;
-                    room.Status = 1;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(room).State = EntityState.Modified;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -131,17 +113,15 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void DenyRoom(int id)
+        public async Task ActivateRoom(int id)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var room = context.Rooms.SingleOrDefault(h => h.RoomId.Equals(id));
-                    context.Attach(room).State = EntityState.Modified;
-                    room.Status = 3;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                var room = HostelManagementDBContext.Rooms.SingleOrDefault(h => h.RoomId.Equals(id));
+                HostelManagementDBContext.Rooms.Attach(room);
+                room.Status = 1;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -149,17 +129,31 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void PendingRoom(int id)
+        public async Task DenyRoom(int id)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var room = context.Rooms.SingleOrDefault(h => h.RoomId.Equals(id));
-                    context.Attach(room).State = EntityState.Modified;
-                    room.Status = 0;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                var room = HostelManagementDBContext.Rooms.SingleOrDefault(h => h.RoomId.Equals(id));
+                HostelManagementDBContext.Rooms.Attach(room);
+                room.Status = 3;
+                await HostelManagementDBContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task PendingRoom(int id)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                var room = HostelManagementDBContext.Rooms.SingleOrDefault(h => h.RoomId.Equals(id));
+                HostelManagementDBContext.Rooms.Attach(room);
+                room.Status = 0;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {

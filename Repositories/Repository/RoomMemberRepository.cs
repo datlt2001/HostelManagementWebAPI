@@ -7,10 +7,10 @@ namespace DataAccess.Repository
 {
     public class RoomMemberRepository : IRoomMemberRepository
     {
-        public void AddRoomMember(RoomMember RoomMember) =>  RoomMemberDAO.AddRoomMember(RoomMember);
-        public IEnumerable<RoomMember> GetRoomMemberList() =>  RoomMemberDAO.GetRoomMemberList();
-        public RoomMember GetRoomMemberByID(int id) =>  RoomMemberDAO.GetRoomMemberByID(id);
-        public void UpdateRoomMember(RoomMember RoomMember) =>  RoomMemberDAO.UpdateRoomMember(RoomMember);
-        public RoomMember GetRoomMemberByEmail(string email, int rentId) =>  RoomMemberDAO.GetRoomMemberByEmail(email, rentId);
+        public async Task AddRoomMember(RoomMember RoomMember) => await RoomMemberDAO.Instance.AddRoomMember(RoomMember);
+        public async Task<IEnumerable<RoomMember>> GetRoomMemberList() => await RoomMemberDAO.Instance.GetRoomMemberList();
+        public async Task<RoomMember> GetRoomMemberByID(int id) => await RoomMemberDAO.Instance.GetRoomMemberByID(id);
+        public async Task UpdateRoomMember(RoomMember RoomMember) => await RoomMemberDAO.Instance.UpdateRoomMember(RoomMember);
+        public async Task<RoomMember> GetRoomMemberByEmail(string email, int rentId) => await RoomMemberDAO.Instance.GetRoomMemberByEmail(email, rentId);
     }
 }

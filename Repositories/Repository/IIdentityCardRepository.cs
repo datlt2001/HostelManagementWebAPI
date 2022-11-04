@@ -9,9 +9,9 @@ namespace DataAccess.Repository
 {
     public interface IIdentityCardRepository
     {
-        void AddIdCard(IdentityCard idCard);
-        void DeleteIdCard(IdentityCard idCard);
-        void UpdateIdCard(IdentityCard idCard);
-        IdentityCard GetIdentityCardByID(string id);
+        Task AddIdCard(IdentityCard idCard);
+        Task DeleteIdCard(IdentityCard idCard);
+        Task UpdateIdCard(IdentityCard idCard);
+        Task<IdentityCard> GetIdentityCardByID(string id);
     }
 }

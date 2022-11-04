@@ -11,6 +11,6 @@ namespace DataAccess.Repository
 {
     public class CategoryRepository : ICategoryRepository
     {
-        public  IEnumerable<Category> GetCategoriesList() => CategoryDAO.GetCategoriesList();
+        public async Task<IEnumerable<Category>> GetCategoriesList() => await CategoryDAO.Instance.GetCategoriesList();
     }
 }

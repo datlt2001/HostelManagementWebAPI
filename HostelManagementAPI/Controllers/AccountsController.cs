@@ -20,38 +20,43 @@ namespace HostelManagementAPI.Controllers
         private IAccountRepository repository = new AccountRepository();
         //GET: api/Accounts
         [HttpGet]
-        public ActionResult<IEnumerable<Account>> GetAccounts() => repository.GetAccounts();
+        public async Task<IActionResult> Get()
+        {
+            var isSuccessResult = await repository.GetAccountList();
+            if (isSuccessResult == null) return BadRequest();
+            return Ok(isSuccessResult);
+        }
 
         //POST: AccountsController/Accounts
         [HttpPost]
-        public IActionResult PostAccount([FromForm] Account acc)
+        public async Task<IActionResult> PostAccount([FromForm] Account acc)
         {
             acc.UserId = 0;
             acc.IdCardNumberNavigation = null;
             acc.Hostels = null;
             acc.Rents = null;
-            repository.AddAccount(acc);
-            return NoContent();
+            await repository.AddAccount(acc);
+            return Ok(acc);
         }
 
         //GET: AccountsController/Delete/4
         [HttpDelete("id")]
-        public IActionResult DeleteAccount(int id)
+        public async Task<IActionResult> DeleteAccount(int id)
         {
-            var acc = repository.GetAccountByID(id);
+            var acc = await repository .GetAccountByID(id);
             if (acc == null)
             {
                 return NotFound();
             }
 
-            repository.DeleteAccount(acc);
+            await repository.DeleteAccount(acc);
             return NoContent();
         }
 
         [HttpPut("id")]
-        public IActionResult UpdateAccount(int id, [FromForm]Account acc)
+        public async Task<IActionResult> UpdateAccount(int id, [FromBody]Account acc)
         {
-            var aTmp = repository.GetAccountByID(id);
+            var aTmp = await repository.GetAccountByID(id);
             if (acc == null)
             {
                 return NotFound();
@@ -61,14 +66,14 @@ namespace HostelManagementAPI.Controllers
             acc.IdCardNumberNavigation = aTmp.IdCardNumberNavigation;
             acc.Hostels = aTmp.Hostels;
             acc.Rents = aTmp.Rents;
-            repository.UpdateAccount(acc);
-            return NoContent();
+            await repository.UpdateAccount(acc);
+            return Ok(acc);
         }
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] AccountLogin accountLogin)
+        public async Task<IActionResult> Login([FromBody] AccountLogin accountLogin)
         {
-            var result = repository.GetLoginAccount(accountLogin.email, accountLogin.password);
+            var result = await repository.GetLoginAccount(accountLogin.email, accountLogin.password);
             ErrMessage err = new ErrMessage();
             if (result == null)
             {
@@ -97,7 +102,7 @@ namespace HostelManagementAPI.Controllers
                     IsPersistent = true
                 };
 
-                HttpContext.SignInAsync(
+                await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
@@ -125,7 +130,7 @@ namespace HostelManagementAPI.Controllers
                     IsPersistent = true
                 };
 
-                HttpContext.SignInAsync(
+                await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
@@ -162,7 +167,7 @@ namespace HostelManagementAPI.Controllers
                     IsPersistent = true
                 };
 
-                HttpContext.SignInAsync(
+                await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
@@ -192,9 +197,9 @@ namespace HostelManagementAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            var acc = repository.GetAccountByID(id);
+            var acc = await repository.GetAccountByID(id);
             if (acc == null)
             {
                 return NotFound();

@@ -10,9 +10,9 @@ namespace DataAccess.Repository
 {
     public class BillRepository : IBillRepository
     {
-        public void AddBill(Bill bill) =>  BillDAO.AddBill(bill);
-        public void UpdateBill(Bill bill) =>  BillDAO.UpdateBill(bill);
-        public Bill GetBillById(int BillId) =>  BillDAO.GetBillById(BillId);
-        public IEnumerable<Bill> GetBillList() =>  BillDAO.GetBillList();
+        public async Task AddBill(Bill bill) => await BillDAO.Instance.AddBill(bill); 
+        public async Task UpdateBill(Bill bill) => await BillDAO.Instance.UpdateBill(bill); 
+        public async Task<Bill> GetBillById(int BillId) => await BillDAO.Instance.GetBillById(BillId);
+        public async Task<IEnumerable<Bill>> GetBillList() => await BillDAO.Instance.GetBillList();
     }
 }

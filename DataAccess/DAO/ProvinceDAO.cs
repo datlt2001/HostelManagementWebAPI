@@ -10,22 +10,34 @@ namespace DataAccess.DAO
 {
     public class ProvinceDAO
     {
-        public static IEnumerable<Province> GetProvincesList()
+        private static ProvinceDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static ProvinceDAO Instance
         {
-            var listHostels = new List<Province>();
+            get
+            {
+                lock (instanceLock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new ProvinceDAO();
+                    }
+                    return instance;
+                }
+            }
+        }
+
+        public async Task<IEnumerable<Province>> GetProvincesList()
+        {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    listHostels = context.Provinces.OrderBy(p => p.ProvinceName)
-                    .ToList();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Provinces.OrderBy(p => p.ProvinceName).ToListAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            return listHostels;
         }
     }
 }

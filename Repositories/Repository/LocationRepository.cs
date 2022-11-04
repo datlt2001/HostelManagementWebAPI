@@ -11,11 +11,11 @@ namespace DataAccess.Repository
 {
     public class LocationRepository : ILocationRepository
     {
-        public void AddLocation(Location Location) =>  LocationDAO.AddLocation(Location);
-        public Location GetLocationByID(int id) =>  LocationDAO.GetLocationByID(id);
+        public async Task AddLocation(Location Location) => await LocationDAO.Instance.AddLocation(Location);
+        public async Task<Location> GetLocationByID(int id) => await LocationDAO.Instance.GetLocationByID(id);
 
-        public IEnumerable<Location> GetLocationsList() =>  LocationDAO.GetLocationsList();
+        public async Task<IEnumerable<Location>> GetLocationsList() => await LocationDAO.Instance.GetLocationsList();
 
-        public void UpdateLocation(Location location) =>  LocationDAO.UpdateLocation(location);
+        public async Task UpdateLocation(Location location) => await LocationDAO.Instance.UpdateLocation(location);
     }
 }

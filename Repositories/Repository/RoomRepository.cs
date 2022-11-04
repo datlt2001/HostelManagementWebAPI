@@ -7,17 +7,17 @@ namespace DataAccess.Repository
 {
     public class RoomRepository : IRoomRepository
     {
-        public void AddRoom(Room Room) =>  RoomDAO.AddRoom(Room);
-        public void DeleteRoom(Room Room) =>  RoomDAO.DeleteRoom(Room);
+        public async Task AddRoom(Room Room) => await RoomDAO.Instance.AddRoom(Room);
+        public async Task DeleteRoom(Room Room) => await RoomDAO.Instance.DeleteRoom(Room);
 
-        public Room GetRoomByID(int id) =>  RoomDAO.GetRoomByID(id);
+        public async Task<Room> GetRoomByID(int id) => await RoomDAO.Instance.GetRoomByID(id);
 
-        public IEnumerable<Room> GetRoomList() =>  RoomDAO.GetRoomsList();
-        public IEnumerable<Room> GetRoomsOfAHostel(int hostelId) =>  RoomDAO.GetRoomsOfAHostel(hostelId);
+        public async Task<IEnumerable<Room>> GetRoomList() => await RoomDAO.Instance.GetRoomsList();
+        public async Task<IEnumerable<Room>> GetRoomsOfAHostel(int hostelId) => await RoomDAO.Instance.GetRoomsOfAHostel(hostelId);
 
-        public void UpdateRoom(Room Room) =>  RoomDAO.UpdateRoom(Room);
-        public void ActivateRoom(int id) =>  RoomDAO.ActivateRoom(id);
-        public void DenyRoom(int id) =>  RoomDAO.DenyRoom(id);
-        public void PendingRoom(int id) =>  RoomDAO.PendingRoom(id);
+        public async Task UpdateRoom(Room Room) => await RoomDAO.Instance.UpdateRoom(Room);
+        public async Task ActivateRoom(int id) => await RoomDAO.Instance.ActivateRoom(id);
+        public async Task DenyRoom(int id) => await RoomDAO.Instance.DenyRoom(id);
+        public async Task PendingRoom(int id) => await RoomDAO.Instance.PendingRoom(id);
     }
 }

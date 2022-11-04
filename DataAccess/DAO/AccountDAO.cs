@@ -11,53 +11,30 @@ namespace DataAccess.DAO
 {
     public class AccountDAO
     {
-        public static List<Account> GetAccountList()
+        private static AccountDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static AccountDAO Instance
         {
-            var listAccounts = new List<Account>();
-            try
+            get
             {
-                using (var context = new HostelManagementDBContext())
+                lock (instanceLock)
                 {
-                    listAccounts = context.Accounts.ToList();
+                    if (instance == null)
+                    {
+                        instance = new AccountDAO();
+                    }
+                    return instance;
                 }
-            }
-            catch (Exception e)
-            {
-                throw new Exception(e.Message);
-            }
-            return listAccounts;
-        }
-
-        public static void AddAccount(Account Account)
-        {
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    //context.Attach(Account).State = EntityState.Added;
-                    context.Accounts.Add(Account);
-                    //context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [HostelManagementDB].[dbo].[Account] OFF");
-                    context.SaveChanges();
-                    //context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [HostelManagementDB].[dbo].[Account] OFF");
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("message: " + ex.Message);
-                
             }
         }
-
-        public static void DeleteAccount(Account Account)
+        private AccountDAO() { }
+        public async Task AddAccount(Account Account)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var acc = context.Accounts.SingleOrDefault(a => a.UserId == Account.UserId);
-                    context.Accounts.Remove(acc);
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(Account).State = EntityState.Added;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -65,95 +42,13 @@ namespace DataAccess.DAO
             }
         }
 
-        public static Account GetAccountByEmail(string email)
-        {
-            var acc = new Account();
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    acc = context.Accounts
-                        .Include(id => id.IdCardNumberNavigation)
-                        .Include(id => id.Hostels)
-                        .Include(id => id.Rents)
-                        .SingleOrDefault(account => account.UserEmail == email);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return acc;
-        }
-
-        public static Account GetAccountByID(int id)
-        {
-            var acc = new Account();
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    acc = context.Accounts
-                        .Include(id => id.IdCardNumberNavigation)
-                        .Include(id => id.Hostels)
-                        .Include(id => id.Rents)
-                        .SingleOrDefault(account => account.UserId == id);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return acc;
-        }
-
-        public static Account GetLoginAccount(string email, string password)
-        {
-            var acc = new Account();
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    acc = context.Accounts
-                        .Include(id => id.IdCardNumberNavigation)
-                        .Include(id => id.Hostels)
-                        .Include(id => id.Rents)
-                        .SingleOrDefault(account => account.UserEmail == email && account.UserPassword == password);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return acc;
-        }
-
-        public static void UpdateAccount(Account Account)
+        public async Task DeleteAccount(Account Account)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.Attach(Account).State = EntityState.Modified;
-                    context.SaveChanges();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-        public static void InactiveUser(int id)
-        {
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var account = context.Accounts.SingleOrDefault(a => a.UserId.Equals(id));
-                    context.Attach(account).State = EntityState.Modified;
-                    account.Status = 0;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Accounts.Remove(Account);
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -161,17 +56,112 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void ActivateUser(int id)
+        public async Task<Account> GetAccountByEmail(string email)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var account = context.Accounts.SingleOrDefault(a => a.UserId.Equals(id));
-                    context.Attach(account).State = EntityState.Modified;
-                    account.Status = 1;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Accounts
+                    .Include(id => id.IdCardNumberNavigation)
+                    .Include(id => id.Hostels)
+                    .Include(id => id.Rents)
+                    .SingleOrDefaultAsync(account => account.UserEmail == email);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Account> GetAccountByID(int id)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Accounts
+                    .Include(id => id.IdCardNumberNavigation)
+                    .Include(id => id.Hostels)
+                    .Include(id => id.Rents)
+                    .SingleOrDefaultAsync(account => account.UserId == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<Account>> GetAccountList()
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Accounts
+                    .Include(id => id.IdCardNumberNavigation)
+                    .Include(id => id.Hostels)
+                    .Include(id => id.Rents)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<Account> GetLoginAccount(string email, string password)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Accounts
+                    .Include(id => id.IdCardNumberNavigation)
+                    .Include(id => id.Hostels)
+                    .Include(id => id.Rents)
+                    .SingleOrDefaultAsync(account => account.UserEmail == email && account.UserPassword == password);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task UpdateAccount(Account Account)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(Account).State = EntityState.Modified;
+                await HostelManagementDBContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.InnerException.Message);
+            }
+        }
+        public async Task InactiveUser(int id)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                var account = HostelManagementDBContext.Accounts.SingleOrDefault(a => a.UserId.Equals(id));
+                HostelManagementDBContext.Accounts.Attach(account);
+                account.Status = 0;
+                await HostelManagementDBContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task ActivateUser(int id)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                var account = HostelManagementDBContext.Accounts.SingleOrDefault(a => a.UserId.Equals(id));
+                HostelManagementDBContext.Accounts.Attach(account);
+                account.Status = 1;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {

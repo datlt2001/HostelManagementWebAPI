@@ -9,8 +9,8 @@ namespace DataAccess.Repository
 {
     public interface IRoomPicRepository
     {
-        void AddRoomPic(RoomPic RoomPic);
-        IEnumerable<RoomPic> GetRoomPicsOfARoom(int RoomId);
-        void DeleteRoomPic(RoomPic RoomPic);
+        Task AddRoomPic(RoomPic RoomPic);
+        Task<IEnumerable<RoomPic>> GetRoomPicsOfARoom(int RoomId);
+        Task DeleteRoomPic(RoomPic RoomPic);
     }
 }

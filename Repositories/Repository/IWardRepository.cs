@@ -9,6 +9,6 @@ namespace DataAccess.Repository
 {
     public interface IWardRepository
     {
-        IEnumerable<Ward> GetWardListByDistrictId(int DistrictId);
+        Task<IEnumerable<Ward>> GetWardListByDistrictId(int DistrictId);
     }
 }

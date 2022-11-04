@@ -10,21 +10,34 @@ namespace DataAccess.DAO
 {
     public class DistrictDAO
     {
-        public static IEnumerable<District> GetDistrictListByProvinceId(int ProvinceId)
+        private static DistrictDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static DistrictDAO Instance
         {
-            var listDistricts = new List<District>();
-            try
+            get
             {
-                using (var context = new HostelManagementDBContext())
+                lock (instanceLock)
                 {
-                    listDistricts = context.Districts.Where(d => d.ProvinceId == ProvinceId).OrderBy(d => d.DistrictName).ToList();
+                    if (instance == null)
+                    {
+                        instance = new DistrictDAO();
+                    }
+                    return instance;
                 }
             }
-            catch (Exception e)
+        }
+
+        public async Task<IEnumerable<District>> GetDistrictListByProvinceId(int ProvinceId)
+        {
+            try
             {
-                throw new Exception(e.Message);
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Districts.Where(d => d.ProvinceId == ProvinceId).OrderBy(d => d.DistrictName).ToListAsync();
             }
-            return listDistricts;
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

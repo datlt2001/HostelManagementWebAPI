@@ -10,15 +10,29 @@ namespace DataAccess.DAO
 {
     public class HostelDAO
     {
-        public static void AddHostel(Hostel hostel)
+        private static HostelDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static HostelDAO Instance
+        {
+            get
+            {
+                lock (instanceLock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new HostelDAO();
+                    }
+                    return instance;
+                }
+            }
+        }
+        public async Task AddHostel(Hostel hostel)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.Attach(hostel).State = EntityState.Added;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(hostel).State = EntityState.Added;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -26,73 +40,27 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void DeleteHostel(Hostel hostel)
+        public async Task DeleteHostel(Hostel hostel)
         {
             throw new NotImplementedException();
         }
 
-        public static Hostel GetHostelByID(int id)
-        {
-            var acc = new Hostel();
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    acc = context.Hostels
-                    .Include(h => h.Rooms)
-                        .ThenInclude(h => h.RoomPics)
-                    .Include(h => h.Category)
-                    .Include(h => h.HostelOwnerEmailNavigation)
-                    .Include(h => h.Location)
-                        .ThenInclude(h => h.Ward)
-                            .ThenInclude(h => h.District)
-                                .ThenInclude(h => h.Province)
-                    .Include(h => h.HostelPics)
-                    .FirstOrDefault(hostel => hostel.HostelId == id);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return acc;
-        }
-
-        public static IEnumerable<Hostel> GetHostelsList()
-        {
-            var listHostels = new List<Hostel>();
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    listHostels = context.Hostels
-                    .Include(h => h.Rooms)
-                    .Include(h => h.Category)
-                    .Include(h => h.Location)
-                        .ThenInclude(h => h.Ward)
-                     //       .ThenInclude(h => h.District)
-                     //          .ThenInclude(h => h.Province)
-                    .Include(h => h.HostelPics)
-                    .Include(h => h.HostelOwnerEmailNavigation)
-                    .ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return listHostels;
-        }
-
-        public static void UpdateHostel(Hostel hostel)
+        public async Task<Hostel> GetHostelByID(int id)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.Attach(hostel).State = EntityState.Modified;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Hostels
+                    //.Include(h => h.Rooms)
+                    //    .ThenInclude(h => h.RoomPics)
+                    //.Include(h => h.Category)
+                    //.Include(h => h.HostelOwnerEmailNavigation)
+                    //.Include(h => h.Location)
+                    //    .ThenInclude(h => h.Ward)
+                    //        .ThenInclude(h => h.District)
+                    //            .ThenInclude(h => h.Province)
+                    //.Include(h => h.HostelPics)
+                    .FirstOrDefaultAsync(hostel => hostel.HostelId == id);
             }
             catch (Exception ex)
             {
@@ -100,14 +68,48 @@ namespace DataAccess.DAO
             }
         }
 
-        public static IEnumerable<Hostel> GetHostelsOfAnOwner(int id)
+        public async Task<IEnumerable<Hostel>> GetHostelsList()
         {
-            var accs = new List<Hostel>();
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    accs = context.Hostels
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Hostels
+                    //.Include(h => h.Rooms)
+                    //.Include(h => h.Category)
+                    //.Include(h => h.Location)
+                    //    .ThenInclude(h => h.Ward)
+                    //        .ThenInclude(h => h.District)
+                    //            .ThenInclude(h => h.Province)
+                    //.Include(h => h.HostelPics)
+                    //.Include(h => h.HostelOwnerEmailNavigation)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task UpdateHostel(Hostel hostel)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(hostel).State = EntityState.Modified;
+                await HostelManagementDBContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<Hostel>> GetHostelsOfAnOwner(int id)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.Hostels
                     //.Include(h => h.Rooms)
                     //.Include(h => h.Category)
                     //.Include(h => h.Location)
@@ -118,27 +120,7 @@ namespace DataAccess.DAO
                     //.Include(h => h.HostelOwnerEmailNavigation)
                     //.ThenInclude(h => h.UserId)
                     .Where(h => h.HostelOwnerEmailNavigation.UserId == id)
-                    .ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            return accs;
-        }
-
-        public static void DeactivateHostel(int id)
-        {
-            try
-            {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var hostel = context.Hostels.SingleOrDefault(a => a.HostelId.Equals(id));
-                    context.Attach(hostel).State = EntityState.Modified;
-                    hostel.Status = 2;
-                    context.SaveChanges();
-                }
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -146,17 +128,15 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void ActivateHostel(int id)
+        public async Task DeactivateHostel(int id)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var hostel = context.Hostels.SingleOrDefault(a => a.HostelId.Equals(id));
-                    context.Attach(hostel).State = EntityState.Modified;
-                    hostel.Status = 1;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                var hostel = HostelManagementDBContext.Hostels.SingleOrDefault(h => h.HostelId.Equals(id));
+                HostelManagementDBContext.Hostels.Attach(hostel);
+                hostel.Status = 2;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -164,17 +144,31 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void DenyHostel(int id)
+        public async Task ActivateHostel(int id)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    var hostel = context.Hostels.SingleOrDefault(a => a.HostelId.Equals(id));
-                    context.Attach(hostel).State = EntityState.Modified;
-                    hostel.Status = 3;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                var hostel = HostelManagementDBContext.Hostels.SingleOrDefault(h => h.HostelId.Equals(id));
+                HostelManagementDBContext.Hostels.Attach(hostel);
+                hostel.Status = 1;
+                await HostelManagementDBContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task DenyHostel(int id)
+        {
+            try
+            {
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                var hostel = HostelManagementDBContext.Hostels.SingleOrDefault(h => h.HostelId.Equals(id));
+                HostelManagementDBContext.Hostels.Attach(hostel);
+                hostel.Status = 3;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {

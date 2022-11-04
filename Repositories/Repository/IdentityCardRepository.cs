@@ -10,9 +10,9 @@ namespace DataAccess.Repository
 {
     public class IdentityCardRepository : IIdentityCardRepository
     {
-        public void AddIdCard(IdentityCard idCard) => IdentityCardDAO.AddIdCard(idCard);
-        public void DeleteIdCard(IdentityCard idCard) => IdentityCardDAO.DeleteIdCard(idCard);
-        public void UpdateIdCard(IdentityCard idCard) => IdentityCardDAO.UpdateIdCard(idCard);
-        public IdentityCard GetIdentityCardByID(string id) => IdentityCardDAO.GetIdentityCardByID(id);
+        public async Task AddIdCard(IdentityCard idCard) => await IdentityCardDAO.Instance.AddIdCard(idCard);
+        public async Task DeleteIdCard(IdentityCard idCard) => await IdentityCardDAO.Instance.DeleteIdCard(idCard);
+        public async Task UpdateIdCard(IdentityCard idCard) => await IdentityCardDAO.Instance.UpdateIdCard(idCard);
+        public async Task<IdentityCard> GetIdentityCardByID(string id) => await IdentityCardDAO.Instance.GetIdentityCardByID(id);
     }
 }

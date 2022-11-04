@@ -9,6 +9,6 @@ namespace DataAccess.Repository
 {
     public interface ICategoryRepository
     {
-        IEnumerable<Category> GetCategoriesList();
+        Task<IEnumerable<Category>> GetCategoriesList();
     }
 }

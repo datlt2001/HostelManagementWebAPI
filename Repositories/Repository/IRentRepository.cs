@@ -9,10 +9,10 @@ namespace DataAccess.Repository
 {
     public interface IRentRepository
     {
-        void AddRent(Rent Rent);
-        void UpdateRent(Rent Rent);
-        IEnumerable<Rent> GetRentListByRoom(int roomId);
-        IEnumerable<Rent> GetRentList();
-        Rent GetRentByID(int id);
+        Task AddRent(Rent Rent);
+        Task UpdateRent(Rent Rent);
+        Task<IEnumerable<Rent>> GetRentListByRoom(int roomId);
+        Task<IEnumerable<Rent>> GetRentList();
+        Task<Rent> GetRentByID(int id);
     }
 }

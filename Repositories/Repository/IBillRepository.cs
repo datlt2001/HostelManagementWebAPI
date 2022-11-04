@@ -9,9 +9,9 @@ namespace DataAccess.Repository
 {
     public interface IBillRepository
     {
-        void AddBill(Bill bill);
-        void UpdateBill(Bill bill);
-        Bill GetBillById(int BillId);
-        IEnumerable<Bill> GetBillList();
+        Task AddBill(Bill bill); 
+        Task UpdateBill(Bill bill); 
+        Task<Bill> GetBillById(int BillId);
+        Task<IEnumerable<Bill>> GetBillList();
     }
 }

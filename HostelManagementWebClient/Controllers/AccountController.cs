@@ -33,7 +33,7 @@ namespace HostelManagementWebClient.Controllers
             {
                 PropertyNameCaseInsensitive = true
             };
-            List<Account> listAccounts = JsonSerializer.Deserialize<List<Account>>(strData, options);
+            IEnumerable<Account> listAccounts = JsonSerializer.Deserialize<IEnumerable<Account>>(strData, options);
 
             return View(listAccounts);
         }

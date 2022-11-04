@@ -11,6 +11,6 @@ namespace DataAccess.Repository
 {
     public class ProvinceRepository : IProvinceRepository
     {
-        public IEnumerable<Province> GetProvincesList() => ProvinceDAO.GetProvincesList();
+        public async Task<IEnumerable<Province>> GetProvincesList() => await ProvinceDAO.Instance.GetProvincesList();
     }
 }

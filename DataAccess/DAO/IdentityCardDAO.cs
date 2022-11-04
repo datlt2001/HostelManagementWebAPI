@@ -11,15 +11,28 @@ namespace DataAccess.DAO
 {
     public class IdentityCardDAO
     {
-        public static void AddIdCard(IdentityCard idCard)
+        private static IdentityCardDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static IdentityCardDAO Instance
+        {
+            get
+            {
+                lock(instanceLock)
+                {
+                    if (instance == null)
+                        instance = new IdentityCardDAO();
+                    return instance;
+                }
+            }
+        }
+        private IdentityCardDAO() { }
+        public async Task AddIdCard(IdentityCard idCard)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.Attach(idCard).State = EntityState.Added;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(idCard).State = EntityState.Added;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -27,31 +40,26 @@ namespace DataAccess.DAO
             }
         }
 
-        public static void DeleteIdCard(IdentityCard idCard)
+        public async Task DeleteIdCard(IdentityCard idCard)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.IdentityCards.Remove(idCard);
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.IdentityCards.Remove(idCard);
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
-        public static void UpdateIdCard(IdentityCard idCard)
+        public async Task UpdateIdCard(IdentityCard idCard)
         {
-
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.Attach(idCard).State = EntityState.Modified;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(idCard).State = EntityState.Modified;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -59,23 +67,19 @@ namespace DataAccess.DAO
             }
         }
 
-        public static IdentityCard GetIdentityCardByID(string id)
+        public async Task<IdentityCard> GetIdentityCardByID(string id)
         {
-            var acc = new IdentityCard();
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    acc = context.IdentityCards
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.IdentityCards
                     .Include(h => h.Accounts)
-                    .FirstOrDefault(idC => idC.IdCardNumber == id);
-                }
+                    .FirstOrDefaultAsync(idC => idC.IdCardNumber == id);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            return acc;
         }
     }
 }

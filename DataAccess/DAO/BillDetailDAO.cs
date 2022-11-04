@@ -11,16 +11,30 @@ namespace DataAccess.DAO
 {
     public class BillDetailDAO
     {
+        private static BillDetailDAO instance = null;
+        private static readonly object instanceLock = new object();
+        public static BillDetailDAO Instance
+        {
+            get
+            {
+                lock (instanceLock)
+                {
+                    if (instance == null)
+                    {
+                        instance = new BillDetailDAO();
+                    }
+                    return instance;
+                }
+            }
+        }
 
-        public static void AddBillDetail(BillDetail billDetail)
+        public async Task AddBillDetail(BillDetail billDetail)
         {
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    context.Attach(billDetail).State = EntityState.Added;
-                    context.SaveChanges();
-                }
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                HostelManagementDBContext.Attach(billDetail).State = EntityState.Added;
+                await HostelManagementDBContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -28,27 +42,23 @@ namespace DataAccess.DAO
             }
         }
 
-        public static IEnumerable<BillDetail> GetBillDetailList()
+        public async Task<IEnumerable<BillDetail>> GetBillDetailList()
         {
-            var listBillDetails = new List<BillDetail>();
             try
             {
-                using (var context = new HostelManagementDBContext())
-                {
-                    listBillDetails = context.BillDetails
+                var HostelManagementDBContext = new HostelManagementDBContext();
+                return await HostelManagementDBContext.BillDetails
                     .Include(b => b.Bill)
                         .ThenInclude(b => b.Rent)
                             .ThenInclude(b => b.Room)
                                 .ThenInclude(b => b.Hostel)
                                     .ThenInclude(b => b.HostelOwnerEmailNavigation)
-                    .ToList();
-                }
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            return listBillDetails;
         }
     }
 }
