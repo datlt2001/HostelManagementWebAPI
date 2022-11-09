@@ -1,6 +1,7 @@
 ﻿using BusinessObjects.DTOs;
 using BusinessObjects.Models;
 using DataAccess.Repository;
+using HostelManagementAPI.Helpers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +19,7 @@ namespace HostelManagementAPI.Controllers
     public class AccountsController : ControllerBase
     {
         private IAccountRepository repository = new AccountRepository();
+        private IIdentityCardRepository identityCardRepository = new IdentityCardRepository();
         //GET: api/Accounts
         [HttpGet]
         public async Task<IActionResult> Get()
@@ -27,6 +29,19 @@ namespace HostelManagementAPI.Controllers
             return Ok(isSuccessResult);
         }
 
+        [HttpGet("Search")]
+        public async Task<IActionResult> Search(string searchUser)
+        {
+            var isSuccessResult = await repository.GetAccountList();
+            if (!String.IsNullOrEmpty(searchUser))
+            {
+                isSuccessResult = isSuccessResult.Where(a => a.FullName.ToLower().Contains(searchUser.ToLower()) ||
+                                            a.UserEmail.ToLower().Contains(searchUser.ToLower()))
+                                        .ToList();
+            }
+            if (isSuccessResult == null) return BadRequest();
+            return Ok(isSuccessResult);
+        }
         //POST: AccountsController/Accounts
         [HttpPost]
         public async Task<IActionResult> PostAccount([FromForm] Account acc)
@@ -37,6 +52,19 @@ namespace HostelManagementAPI.Controllers
             acc.Rents = null;
             await repository.AddAccount(acc);
             return Ok(acc);
+        }
+        [HttpGet("Deactivate")]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            await repository.InactivateUser(id);
+            return Ok();
+        }
+
+        [HttpGet("Reactivate")]
+        public async Task<IActionResult> Reactivate(int id)
+        {
+            await repository.ActivateUser(id);
+            return Ok();
         }
 
         //GET: AccountsController/Delete/4
@@ -195,6 +223,13 @@ namespace HostelManagementAPI.Controllers
             }
             return Ok(result);
         }
+        
+        [HttpGet("Logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return Ok();
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -206,6 +241,86 @@ namespace HostelManagementAPI.Controllers
             }
 
             return Ok(acc);
+        }
+
+        [HttpPost("Register")]
+
+        public async Task<IActionResult> Register([FromForm] RegisterForm Input)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            else if (CheckExist(Input.account.UserEmail))
+            {
+                return new JsonResult(new { MessageExistEmail = "Email is existing. Please choose other email." }); 
+            }
+            else if (IdExists(Input.account.IdCardNumber))
+            {
+                return new JsonResult(new { MessageExistId = "ID is existing. Please choose other ID." });
+                
+            }
+            else if (!CheckDob(Input.account.Dob))
+            {
+                return new JsonResult(new { MessageDob = "Invalid DOB. Your age must be 16 or greater." });
+            }
+            else
+            {
+                Account acc = null;
+                Input.IdCard.IdCardNumber = Input.account.IdCardNumber;
+                if (Input.FrontPicUrl != null && Input.BackPicUrl != null)
+                {
+                    Input.IdCard.FrontIdPicUrl = await Utilities.UploadFile(Input.FrontPicUrl, @"images\accounts\idCard", Input.FrontPicUrl.FileName);
+                    Input.IdCard.BackIdPicUrl = await Utilities.UploadFile(Input.BackPicUrl, @"images\accounts\idCard", Input.BackPicUrl.FileName);
+                }
+                await identityCardRepository.AddIdCard(Input.IdCard);
+                var account = new Account()
+                {
+
+                    UserEmail = Input.account.UserEmail,
+                    FullName = Input.account.FullName,
+                    UserPassword = Input.account.UserPassword,
+                    PhoneNumber = Input.account.PhoneNumber,
+                    RoleName = "renter",
+                    Status = 1,
+                    Dob = Input.account.Dob,
+                    IdCardNumber = Input.account.IdCardNumber,
+                    IdCardNumberNavigation = Input.IdCard
+                };
+
+
+                await repository.AddAccount(account);
+
+                acc = repository.GetAccountByEmail(account.UserEmail).Result;
+                HttpContext.Session.SetInt32("isLoggedIn", 1);
+                HttpContext.Session.SetInt32("ID", acc.UserId);
+                HttpContext.Session.SetString("ContactName", acc.FullName);
+                string success = $"Email {acc.UserEmail} register successfully.";
+                HttpContext.Session.SetString("RegisterSuccess", success);
+                return Ok(acc);
+            }
+        }
+
+        private bool CheckDob(DateTime? Dob)
+        {
+            TimeSpan timeDifference = DateTime.Now - Dob.Value;
+            double Age = timeDifference.TotalDays / 365.2425;
+            if (Age >= 16 && Age <= 100) return true;
+            else return false;
+        }
+
+        private bool IdExists(string idCardNumber)
+        {
+            Task<IdentityCard> idCard = identityCardRepository.GetIdentityCardByID(idCardNumber);
+            if (idCard.Result != null) return true;
+            else return false;
+        }
+
+        private bool CheckExist(string userEmail)
+        {
+            var acc = repository.GetAccountByEmail(userEmail);
+            if (acc.Result != null) return true;
+            else return false;
         }
     }
 }
