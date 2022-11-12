@@ -16,7 +16,7 @@ namespace HostelManagementAPI
     public class HostelsController : ControllerBase
     {
         private IHostelRepository repository = new HostelRepository();
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         //GET: api/Hostels
         [HttpGet]
         public async Task<IEnumerable<Hostel>> GetHostels() => await repository.GetHostelsList();
@@ -65,7 +65,7 @@ namespace HostelManagementAPI
 
         // GET api/<HostelsController>/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> GetHostelByID(int id)
         {
             var hostel = await repository.GetHostelByID(id);
             if (hostel == null)

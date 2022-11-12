@@ -1,5 +1,7 @@
+using BusinessObjects.DTOs;
 using DataAccess.Data;
 using DataAccess.Repository;
+using HostelManagementAPI.Helpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -70,6 +72,10 @@ namespace HostelManagementAPI
             services.AddScoped<IBillDetailRepository, BillDetailRepository>();
             services.AddScoped<IRoomMemberRepository, RoomMemberRepository>();
             services.AddScoped<IIdentityCardRepository, IdentityCardRepository>();
+            services.AddOptions();
+            var mailsettings = Configuration.GetSection("MailSettings");
+            services.Configure<MailSettings>(mailsettings);
+            services.AddTransient<ISendMailService, SendMailService>();
 
         }
 
@@ -95,6 +101,21 @@ namespace HostelManagementAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapGet("/testmail", async context =>
+                {
+
+                    var sendmailservice = context.RequestServices.GetService<ISendMailService>();
+
+                    MailContent content = new MailContent
+                    {
+                        To = "thanhdat3001@gmail.com",
+                        Subject = "Test",
+                        Body = "<p><strong>HIIIII</strong></p>"
+                    };
+
+                    await sendmailservice.SendMail(content);
+                    await context.Response.WriteAsync("Send mail");
+                });
             });
         }
     }
